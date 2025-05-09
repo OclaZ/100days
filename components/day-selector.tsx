@@ -6,8 +6,20 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 
+interface Memory {
+  day: number;
+  title: string;
+  description: string;
+  icon: React.ElementType;
+  date: {
+    dayNumber: number;
+    monthName: string;
+    year: number;
+  };
+}
+
 interface DaySelectorProps {
-  memories: any[];
+  memories: Memory[];
   currentDay: number;
   onSelectDay: (dayIndex: number) => void;
   onClose: () => void;
@@ -22,31 +34,30 @@ export default function DaySelector({
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<"all" | "milestones">("all");
 
-  // Define milestone days - these are special days in the relationship
-  const milestones = [0, 29, 49, 74, 89, 99]; // Day 1, 30, 50, 75, 90, 100
+  const milestones = [0, 29, 49, 74, 89, 99];
 
-  // Filter memories based on search term
   const filteredMemories = memories.filter((memory) => {
     const searchString =
       `${memory.title} ${memory.description} Day ${memory.day} ${memory.date.monthName} ${memory.date.dayNumber}`.toLowerCase();
     return searchString.includes(searchTerm.toLowerCase());
   });
 
-  // Filter memories based on active tab
   const displayedMemories =
     activeTab === "milestones"
       ? filteredMemories.filter((_, index) => milestones.includes(index))
       : filteredMemories;
 
-  // Group memories by month for better organization
-  const groupedMemories = displayedMemories.reduce((groups, memory) => {
-    const monthYear = `${memory.date.monthName} ${memory.date.year}`;
-    if (!groups[monthYear]) {
-      groups[monthYear] = [];
-    }
-    groups[monthYear].push(memory);
-    return groups;
-  }, {});
+  const groupedMemories: Record<string, Memory[]> = displayedMemories.reduce(
+    (groups, memory) => {
+      const monthYear = `${memory.date.monthName} ${memory.date.year}`;
+      if (!groups[monthYear]) {
+        groups[monthYear] = [];
+      }
+      groups[monthYear].push(memory);
+      return groups;
+    },
+    {} as Record<string, Memory[]>
+  );
 
   return (
     <motion.div
@@ -123,14 +134,13 @@ export default function DaySelector({
         <div className="overflow-y-auto max-h-[50vh] p-2">
           {Object.keys(groupedMemories).length > 0 ? (
             Object.entries(groupedMemories).map(
-              ([monthYear, monthMemories]: [string, any[]]) => (
+              ([monthYear, monthMemories]: [string, Memory[]]) => (
                 <div key={monthYear} className="mb-4">
                   <h3 className="text-sm font-semibold text-gray-500 px-2 mb-2">
                     {monthYear}
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {monthMemories.map((memory, memoryIndex) => {
-                      // Find the original index in the full memories array
                       const originalIndex = memories.findIndex(
                         (m) =>
                           m.day === memory.day &&
@@ -168,7 +178,6 @@ export default function DaySelector({
                             {memory.description}
                           </p>
 
-                          {/* Show heart icon for milestone days */}
                           {milestones.includes(originalIndex) && (
                             <div className="flex justify-end mt-1">
                               <Heart
