@@ -307,7 +307,7 @@ export default function HomePage() {
       </div>
 
       <footer className="py-6 text-center text-pink-600 mt-8 bg-white/70 px-4 rounded-full backdrop-blur-sm relative z-10">
-        <p>Made with ❤️ for our 100 days together</p>
+        <p>Thanks for being in my life ❤️ </p>
       </footer>
 
       {/* Day Selector Modal */}
